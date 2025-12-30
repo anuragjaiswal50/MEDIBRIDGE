@@ -1,0 +1,106 @@
+Database Schema:
+
+DROP DATABASE IF EXISTS medibridge;
+CREATE DATABASE medibridge;
+USE medibridge;
+
+-- 1. Users Table (Stores login info for everyone)
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    full_name VARCHAR(100),
+    phone VARCHAR(20),
+    user_type ENUM('PATIENT', 'DOCTOR', 'ADMIN') NOT NULL
+);
+
+-- 2. Patients Table
+CREATE TABLE patients (
+    patient_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    gender VARCHAR(10),
+    address TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- 3. Doctors Table (Added consultation_fee)
+CREATE TABLE doctors (
+    doctor_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    specialization VARCHAR(100),
+    experience_years INT,
+    qualification VARCHAR(100),
+    license_number VARCHAR(50),
+    consultation_fee DOUBLE DEFAULT 500.0,
+    is_verified BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- 4. Appointments Table
+CREATE TABLE appointments (
+    appointment_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT,
+    doctor_id INT,
+    appointment_date DATE,
+    appointment_time TIME,
+    symptoms TEXT,
+    status VARCHAR(20) DEFAULT 'PENDING', 
+    meeting_link VARCHAR(255),
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
+);
+
+-- 5. Prescriptions Table
+CREATE TABLE prescriptions (
+    prescription_id INT AUTO_INCREMENT PRIMARY KEY,
+    appointment_id INT,
+    patient_id INT,
+    doctor_id INT,
+    medicine_name VARCHAR(100),
+    dosage VARCHAR(50),
+    frequency VARCHAR(50),
+    duration VARCHAR(50),
+    prescribed_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id)
+);
+--6. Keeps the system records
+CREATE TABLE system_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    action_details VARCHAR(255)
+);
+
+INSERT INTO users (user_id, email, password, full_name, phone, user_type) VALUES 
+(1, 'admin@medibridge.com', 'admin123', 'Tasper', NULL, 'ADMIN'),
+(2, 'anurag1@gmail.com', 'anurag1', 'Anurag Jaiswal', '8081807001', 'DOCTOR'),
+(3, 'sourabh2@gmail.com', 'sourabh2', 'Sourabh Singh kushwaha', '8081807002', 'DOCTOR'),
+(4, 'sanket3@gmail.com', 'sanket3', 'Sanket kumar nagar', '8081807003', 'DOCTOR'),
+(5, 'shreyash4@gmail.com', 'shreyash4', 'Shreyash Singh', '8081807004', 'DOCTOR'),
+(6, 'niraj5@gmail.com', 'niraj5', 'Niraj Kumar', '8081807005', 'DOCTOR'),
+(7, 'sumit6@gmail.com', 'sumit6', 'Sumit Kushwaha', '8081807006', 'DOCTOR'),
+(8, 'devansh7@gmail.com', 'devansh7', 'Devansh Pandey', '8081807007', 'DOCTOR'),
+(9, 'aryan8@gmail.com', 'aryan8', 'Aryan Jaiswal', '8081807008', 'DOCTOR'),
+(10, 'rishu9@gmail.com', 'rishu9', 'Rishu kumar', '8081807009', 'DOCTOR'),
+(12, 'anurag11@gmail.com', 'anurag1', 'Anurag jaiswal', '8081807101', 'PATIENT'),
+(13, 'nitin12@gmail.com', 'nitin2', 'Nitin prasad', '8081807102', 'PATIENT'),
+(14, 'gautam13@gmail.com', 'gautam3', 'Gautam kushwaha', '8081807103', 'PATIENT'),
+(15, 'divya14@gmail.com', 'divya4', 'Divya Pandey', '8081807104', 'PATIENT');
+
+-- Insert Corresponding Doctor Details (Required for app to work)
+INSERT INTO doctors (user_id, specialization, experience_years, qualification, license_number, consultation_fee, is_verified) VALUES
+(2, 'Cardiologist', 5, 'MBBS, MD', 'LIC-002', 800.0, TRUE),
+(3, 'Dermatologist', 4, 'MBBS', 'LIC-003', 600.0, TRUE),
+(4, 'Neurologist', 8, 'MD', 'LIC-004', 1200.0, TRUE),
+(5, 'Pediatrician', 3, 'MBBS', 'LIC-005', 500.0, TRUE),
+(6, 'Orthopedist', 6, 'MS', 'LIC-006', 900.0, TRUE),
+(7, 'General Physician', 10, 'MBBS', 'LIC-007', 400.0, TRUE),
+(8, 'Psychiatrist', 5, 'MD', 'LIC-008', 1500.0, TRUE),
+(9, 'Dentist', 2, 'BDS', 'LIC-009', 300.0, TRUE),
+(10, 'ENT Specialist', 7, 'MS', 'LIC-010', 700.0, TRUE);
+
+-- Insert Corresponding Patient Details (Required for app to work)
+INSERT INTO patients (user_id, gender, address) VALUES
+(12, 'Male', 'Noida, UP'),
+(13, 'Male', 'Delhi'),
+(14, 'Male', 'Lucknow, UP'),
+(15, 'Female', 'Kanpur, UP');
